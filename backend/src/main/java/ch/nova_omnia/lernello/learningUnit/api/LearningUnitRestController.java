@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ch.nova_omnia.lernello.block.dto.request.blockActions.BlockActionDTO;
 import ch.nova_omnia.lernello.block.dto.request.update.RenameLearningUnitDTO;
 import ch.nova_omnia.lernello.block.service.BlockService;
 import ch.nova_omnia.lernello.learningKit.model.LearningKit;
@@ -72,13 +71,6 @@ public class LearningUnitRestController {
     public @Valid LearningUnitResDTO saveLearningUnit(@Valid @RequestBody SaveLearningUnitDTO saveLearningUnitDTO, @PathVariable UUID id) {
         LearningUnit learningUnit = learningUnitService.saveLearningUnit(id, saveLearningUnitDTO);
         return learningUnitMapper.toDTO(learningUnit);
-    }
-
-    @PostMapping("/{id}/apply-block-actions")
-    @PreAuthorize("hasAuthority('SCOPE_learningUnit:write')")
-    public @Valid Map<String, UUID> applyBlockActions(@PathVariable UUID id, @RequestBody List<BlockActionDTO> actionQueue) {
-        Map<String, UUID> temporaryKeyMap = blockService.applyBlockActions(id, actionQueue);
-        return temporaryKeyMapper.toDTO(temporaryKeyMap).temporaryKeyMap();
     }
 
     @PostMapping("/")
