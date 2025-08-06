@@ -1,6 +1,7 @@
 # 📚 Lernello – Frontend
 
-A production-ready **React frontend** (Vite) for data-driven SPAs with **routing, forms, i18n**, and **API integration**.  
+A production-ready **React frontend** (Vite) for data-driven SPAs with **routing, forms, i18n**, and **API integration
+**.  
 Designed to help you ship feature-rich UIs fast—lean, type-safe, and maintainable.
 
 ---
@@ -11,7 +12,7 @@ Designed to help you ship feature-rich UIs fast—lean, type-safe, and maintaina
 | ------------- | ------------------------------------------------------------------------ | ----------------------------------------------------- |
 | **Core**      | React **19**, Vite **6**                                                 | Modern React app, fast dev server & build             |
 | **Styling**   | Tailwind CSS **4**, `tailwind-merge`, `clsx`, `class-variance-authority` | Utility CSS, clean class composition, variant pattern |
-| **Routing**   | `react-router-dom` **v7**                                                | SPA routing (layouts, guards, optional loaders)       |
+| **Routing**   | `react-router` **v7**                                                    | SPA routing (layouts, guards, optional loaders)       |
 | **Forms**     | `react-hook-form`, `zod`, `@hookform/resolvers`                          | Lightweight forms + schema validation                 |
 | **Data**      | `@tanstack/react-query` (+ Devtools in dev)                              | Fetching, caching, mutations, revalidation            |
 | **i18n**      | `i18next`, `react-i18next`                                               | Translations & localization                           |
