@@ -1,0 +1,71 @@
+plugins {
+    java
+    id("org.springframework.boot") version "3.4.2"
+    id("io.spring.dependency-management") version "1.1.7"
+}
+
+group = "ch.nova-omnia"
+version = "0.0.1-SNAPSHOT"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(24)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("org.apache.pdfbox:pdfbox:2.0.34") {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
+    implementation("org.mapstruct:mapstruct:1.6.3")
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    compileOnly("org.projectlombok:lombok:1.18.38")
+    implementation("org.openapitools:jackson-databind-nullable:0.2.6")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+    runtimeOnly("org.postgresql:postgresql:42.7.3")
+    annotationProcessor("org.projectlombok:lombok:1.18.38")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.2.Final")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
+    testImplementation("org.testcontainers:postgresql:1.21.2")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.4.2")
+    }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+val startDocker by tasks.registering(Exec::class) {
+    group = "development"
+    description = "Starts PostgreSQL via Docker Compose"
+    workingDir = file("../docker")
+    commandLine = listOf("docker", "compose", "up", "-d")
+}
+
+tasks.register("startDev") {
+    group = "development"
+    description = "Starts Docker and runs backend with local profile"
+
+    dependsOn(startDocker)       // ensures docker is started before
+    finalizedBy("bootRun")       // runs bootRun after this task
+}

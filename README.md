@@ -15,14 +15,14 @@ Hi 👉👈
 
 ## Backend (`/backend`)
 
-> **Stack:** Java 23 · Gradle 8+ · Spring Boot
+> **Stack:** Java 24 · Gradle 9 · Spring Boot
 
 ### Requirements
 
 | Tool   | Version              |
 |--------|----------------------|
-| Java   | 23                   |
-| Gradle | 8 (Wrapper included) |
+| Java   | 24                   |
+| Gradle | 9 (Wrapper included) |
 
 ### Common Commands
 
