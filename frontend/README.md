@@ -9,7 +9,7 @@ Designed to help you ship feature-rich UIs fast—lean, type-safe, and maintaina
 ## ⚙️ Stack Overview
 
 | Category      | Package(s)                                                               | Purpose                                               |
-|---------------|--------------------------------------------------------------------------|-------------------------------------------------------|
+| ------------- | ------------------------------------------------------------------------ | ----------------------------------------------------- |
 | **Core**      | React **19**, Vite **6**                                                 | Modern React app, fast dev server & build             |
 | **Styling**   | Tailwind CSS **4**, `tailwind-merge`, `clsx`, `class-variance-authority` | Utility CSS, clean class composition, variant pattern |
 | **Routing**   | `react-router` **v7**                                                    | SPA routing (layouts, guards, optional loaders)       |
