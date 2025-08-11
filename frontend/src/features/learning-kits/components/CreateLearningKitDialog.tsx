@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+// TODO move to own file with other learning kit related schemas
 const Schema = z.object({
   title: z.string().min(2, "Please enter a name").max(100),
   description: z.string().max(300).optional(),

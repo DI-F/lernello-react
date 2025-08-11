@@ -32,7 +32,7 @@ export function LearningKitCard({
 }) {
   return (
     <Card className="relative transition hover:shadow-sm hover:ring-1 hover:ring-border">
-      <Link to={`/learning-unit/${id}`} className="absolute inset-0 z-0" />
+      <Link to={`/learning-kits/${id}`} className="absolute inset-0 z-0" />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -71,7 +71,7 @@ export function LearningKitCard({
 
       <CardFooter className="pt-2">
         <Button asChild size="sm" variant="secondary" className="z-10 w-full">
-          <Link to={`/learning-unit/${id}`}>
+          <Link to={`/learning-kits/${id}`}>
             Open <ArrowRight />
           </Link>
         </Button>
