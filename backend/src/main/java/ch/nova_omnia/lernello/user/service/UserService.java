@@ -34,7 +34,7 @@ public class UserService {
     }
 
     @Transactional
-    public User findOrCreateByEmail(String email) {
+    public User findOrCreateByUsername(String email) {
         return userRepository.findByUsernameIgnoreCase(email)
             .orElseGet(() -> {
                 User u = new User();

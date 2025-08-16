@@ -105,7 +105,7 @@ public class OtpCodeService {
         active.setConsumedAt(now);
         otpCodeRepository.save(active);
 
-        // User sicherstellen und JWT setzen
+        // Secure user and generate JWT token
         User user = userService.findOrCreateByUsername(email);
         String token = jwtUtil.generateToken(user.getUsername());
 
