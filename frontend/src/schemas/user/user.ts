@@ -6,10 +6,9 @@ export const Role = z.enum([TRAINEE_ROLE, INSTRUCTOR_ROLE]);
 export type RoleType = z.infer<typeof Role>;
 
 export const UserSchema = z.object({
-  uuid: z.string().uuid().nonempty(),
-  username: z.string().nonempty(),
-  locale: z.string().nullable(),
-  changedPassword: z.boolean(),
+  uuid: z.string().uuid(),
+  username: z.string().email(),
   role: Role,
+  locale: z.string().nullable(),
 });
 export type User = z.infer<typeof UserSchema>;

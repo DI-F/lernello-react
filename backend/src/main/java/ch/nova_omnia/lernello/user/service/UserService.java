@@ -1,10 +1,12 @@
 package ch.nova_omnia.lernello.user.service;
 
-import java.security.SecureRandom;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-
+import ch.nova_omnia.lernello.auth.JwtUtil;
+import ch.nova_omnia.lernello.learningKit.model.LearningKit;
+import ch.nova_omnia.lernello.learningKit.repository.LearningKitRepository;
+import ch.nova_omnia.lernello.user.model.Role;
+import ch.nova_omnia.lernello.user.model.User;
+import ch.nova_omnia.lernello.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,13 +14,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import ch.nova_omnia.lernello.learningKit.model.LearningKit;
-import ch.nova_omnia.lernello.learningKit.repository.LearningKitRepository;
-import ch.nova_omnia.lernello.security.JwtUtil;
-import ch.nova_omnia.lernello.user.model.Role;
-import ch.nova_omnia.lernello.user.model.User;
-import ch.nova_omnia.lernello.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import java.security.SecureRandom;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

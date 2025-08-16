@@ -1,7 +1,4 @@
-package ch.nova_omnia.lernello.security;
-
-import java.util.Arrays;
-import java.util.List;
+package ch.nova_omnia.lernello.auth;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,17 +17,19 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Configuration for the web security.
  */
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
-    @Value("${cors.allowed-origins}")
-    private String corsAllowedOrigins;
-
     public static final String[] WHITELIST_URLS = {"/api/auth/**", "/error", "/v3/api-docs/**", "/swagger-ui/**", "/webjars/**", "/h2-console/**", "/files/**"
     };
+    @Value("${cors.allowed-origins}")
+    private String corsAllowedOrigins;
 
     @Bean
     AuthTokenFilter authenticationJwtTokenFilter() {
@@ -39,7 +38,7 @@ public class WebSecurityConfig {
 
     @Bean
     AuthenticationManager authenticationManager(
-                                                AuthenticationConfiguration authenticationConfiguration
+        AuthenticationConfiguration authenticationConfiguration
     ) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
@@ -79,21 +78,21 @@ public class WebSecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Disable CSRF
-                .csrf(AbstractHttpConfigurer::disable)
-                // Enable CORS
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // Allow H2 console from the same origin  
-                .headers((headers) -> headers.frameOptions(
-                        frameOptionsConfig -> frameOptionsConfig.sameOrigin()
-                ))
-                // Disable session management
-                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Configure the authorization of requests
-                .authorizeHttpRequests(
-                        auth -> auth.requestMatchers(WHITELIST_URLS).permitAll() // Allow all requests to /api/auth/**
-                                .anyRequest().authenticated() // All other requests require authentication
-                );
+            // Disable CSRF
+            .csrf(AbstractHttpConfigurer::disable)
+            // Enable CORS
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // Allow H2 console from the same origin
+            .headers((headers) -> headers.frameOptions(
+                frameOptionsConfig -> frameOptionsConfig.sameOrigin()
+            ))
+            // Disable session management
+            .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // Configure the authorization of requests
+            .authorizeHttpRequests(
+                auth -> auth.requestMatchers(WHITELIST_URLS).permitAll() // Allow all requests to /api/auth/**
+                    .anyRequest().authenticated() // All other requests require authentication
+            );
         // Add the JWT Token filter before the UsernamePasswordAuthenticationFilter
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
