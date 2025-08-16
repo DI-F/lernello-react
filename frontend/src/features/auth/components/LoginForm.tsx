@@ -13,11 +13,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form.tsx";
-
-export interface LoginFormValues {
-  email: string;
-  remember: boolean;
-}
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type LoginForm, LoginFormSchema } from "@/schemas/auth/login.form.ts";
 
 export interface LoginFormProps {
   className?: string;
@@ -25,7 +22,7 @@ export interface LoginFormProps {
   defaultRemember?: boolean;
   loading?: boolean;
   errorMessage?: string | null;
-  onSubmit?: (values: LoginFormValues) => void; // unsere eigene Callback-Signatur
+  onSubmit?: (values: LoginForm) => void; // unsere eigene Callback-Signatur
 }
 
 export function LoginForm({
@@ -36,7 +33,8 @@ export function LoginForm({
   errorMessage = null,
   onSubmit,
 }: LoginFormProps) {
-  const form = useForm<LoginFormValues>({
+  const form = useForm<LoginForm>({
+    resolver: zodResolver(LoginFormSchema),
     defaultValues: { email: defaultEmail, remember: defaultRemember },
     mode: "onSubmit",
   });

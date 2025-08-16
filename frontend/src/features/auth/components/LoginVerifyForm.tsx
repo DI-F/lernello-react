@@ -15,10 +15,11 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
-
-export interface VerifyFormValues {
-  code: string;
-}
+import {
+  LoginVerifySchema,
+  type VerifyFormValues,
+} from "@/schemas/auth/login-verify.form.ts";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export interface VerifyFormProps {
   className?: string;
@@ -42,6 +43,7 @@ export function VerifyForm({
   onResend,
 }: VerifyFormProps) {
   const form = useForm<VerifyFormValues>({
+    resolver: zodResolver(LoginVerifySchema),
     defaultValues: { code: "" },
     mode: "onSubmit",
   });
