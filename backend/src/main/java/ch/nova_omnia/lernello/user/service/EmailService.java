@@ -32,9 +32,6 @@ public class EmailService {
     public void sendLearningKitInvitation(User user, LearningKit learningKit) {
         try {
             String plainPassword = null;
-            if (!user.isChangedPassword()) {
-                plainPassword = userService.generateRandomPassword();
-            }
 
             MimeMessage mime = buildMimeMessage(
                 user.getUsername(), "Learning‑Kit Invitation: " + learningKit.getName(), buildLearningKitTextContent(user, learningKit, plainPassword), buildLearningKitHtmlContent(user, learningKit, plainPassword)
@@ -43,37 +40,8 @@ public class EmailService {
             javaMailSender.send(mime);
             log.info("Sent learning kit invitation to {}", user.getUsername());
 
-            if (plainPassword != null) {
-                user.setChangedPassword(false);
-                user.setPassword(passwordEncoder.encode(plainPassword));
-                userRepository.save(user);
-            }
         } catch (Exception ex) {
             log.error("Failed to send learning kit invitation to {}: {}", user.getUsername(), ex.getMessage(), ex);
-            throw new RuntimeException("Failed to send email", ex);
-        }
-    }
-
-    /**
-     * Sends an email with new login data to the user.
-     *
-     * @param user The user to whom the email will be sent.
-     */
-    public void sendNewLoginData(User user) {
-        try {
-            String plainPassword = userService.generateRandomPassword();
-            MimeMessage mime = buildMimeMessage(
-                user.getUsername(), "New Login Data", builtResetPasswordTextContent(user.getUsername(), plainPassword), buildResetPasswordHtmlContent(user.getUsername(), plainPassword)
-            );
-
-            javaMailSender.send(mime);
-            log.info("Sent new login data to {}", user.getUsername());
-
-            user.setPassword(passwordEncoder.encode(plainPassword));
-            user.setChangedPassword(false);
-            userRepository.save(user);
-        } catch (Exception ex) {
-            log.error("Failed to send new login data to {}: {}", user.getUsername(), ex.getMessage(), ex);
             throw new RuntimeException("Failed to send email", ex);
         }
     }
@@ -86,27 +54,6 @@ public class EmailService {
         helper.setSubject(subject);
         helper.setText(text, html);
         return mime;
-    }
-
-    private String buildResetPasswordHtmlContent(String username, String pwd) {
-        return baseHtmlWrapper("""
-                <h2 style="color:#2563eb; margin-top:0;">Welcome, %s</h2>
-                <p style="font-size:15px;">You can now log in to Lernello with your new password.</p>
-                <p style="margin-top:30px;">
-                  <strong>🔑 First‑login password:</strong><br>
-                  <code style="background:#f1f5f9; padding:4px 8px; border-radius:4px;">%s</code>
-                </p>
-            """.formatted(username, pwd));
-    }
-
-    private String builtResetPasswordTextContent(String username, String pwd) {
-        return """
-                Welcome, %s
-
-                You can now log in to Lernello with your new password.
-
-                First‑login password: %s
-            """.formatted(username, pwd);
     }
 
     private String buildLearningKitHtmlContent(User user, LearningKit kit, String pwd) {

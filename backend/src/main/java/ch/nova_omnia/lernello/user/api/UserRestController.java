@@ -86,7 +86,6 @@ public class UserRestController {
     @PreAuthorize("hasAuthority('SCOPE_user:write')")
     public @Valid UUID resetUserPassword(@PathVariable UUID id) {
         User user = userService.findByUuid(id);
-        emailService.sendNewLoginData(user);
         return id;
     }
 
