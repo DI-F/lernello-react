@@ -1,9 +1,7 @@
-import { OtpSchema } from "@/schemas/common/otp.ts";
 import { z } from "zod";
-import { EmailSchema } from "@/schemas/common/email.ts";
 
 export const VerifyCodeInputSchema = z.object({
-  email: EmailSchema,
-  code: OtpSchema,
+  email: z.string().email(),
+  code: z.string().length(6),
 });
 export type VerifyCodeInput = z.infer<typeof VerifyCodeInputSchema>;

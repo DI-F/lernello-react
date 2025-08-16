@@ -1,6 +1,5 @@
-import * as React from "react";
-import { GalleryVerticalEnd } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { GalleryVerticalEnd } from "lucide-react";
 
 import { cn } from "@/lib/utils.ts";
 import { Button } from "@/components/ui/button.tsx";
@@ -15,37 +14,40 @@ import {
   FormMessage,
 } from "@/components/ui/form.tsx";
 
-type Values = { email: string; remember: boolean };
+export interface LoginFormValues {
+  email: string;
+  remember: boolean;
+}
 
-type Props = React.ComponentProps<"div"> & {
-  onSubmit?: (values: Values) => void;
+export interface LoginFormProps {
+  className?: string;
+  defaultEmail?: string;
+  defaultRemember?: boolean;
   loading?: boolean;
   errorMessage?: string | null;
-};
+  onSubmit?: (values: LoginFormValues) => void; // unsere eigene Callback-Signatur
+}
 
 export function LoginForm({
   className,
-  onSubmit,
+  defaultEmail = "",
+  defaultRemember = true,
   loading = false,
   errorMessage = null,
-  ...props
-}: Props) {
-  const form = useForm<Values>({
-    defaultValues: { email: "", remember: true },
+  onSubmit,
+}: LoginFormProps) {
+  const form = useForm<LoginFormValues>({
+    defaultValues: { email: defaultEmail, remember: defaultRemember },
     mode: "onSubmit",
   });
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)}>
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit((vals) => {
-            onSubmit?.(vals);
-            if (!onSubmit) console.log("submit", vals);
-          })}
+          onSubmit={form.handleSubmit((vals) => onSubmit?.(vals))}
           className="flex flex-col gap-6"
         >
-          {/* Branding/Header */}
           <div className="flex flex-col items-center gap-2">
             <div className="flex size-10 items-center justify-center rounded-lg">
               <GalleryVerticalEnd className="size-7" />
@@ -56,7 +58,6 @@ export function LoginForm({
             </p>
           </div>
 
-          {/* Email */}
           <FormField
             control={form.control}
             name="email"
@@ -68,8 +69,8 @@ export function LoginForm({
                   <Input
                     id="email"
                     type="email"
-                    placeholder="you@company.com"
                     autoComplete="email"
+                    placeholder="you@company.com"
                     {...field}
                   />
                 </FormControl>
@@ -78,7 +79,6 @@ export function LoginForm({
             )}
           />
 
-          {/* Remember device */}
           <FormField
             control={form.control}
             name="remember"
@@ -104,14 +104,12 @@ export function LoginForm({
             )}
           />
 
-          {/* Error Message */}
           {errorMessage ? (
             <p className="text-sm text-destructive">{errorMessage}</p>
           ) : null}
 
-          {/* Submit */}
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Sending..." : "Continue"}
+            {loading ? "Sending…" : "Continue"}
           </Button>
         </form>
       </Form>
