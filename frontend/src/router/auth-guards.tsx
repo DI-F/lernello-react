@@ -1,19 +1,21 @@
 import { Navigate, Outlet, useLocation } from "react-router";
-import { FullPageSpinner } from "@/components/full-page-spinner.tsx";
-import type { PropsWithChildren } from "react";
-import { useMeQuery } from "@/features/auth/queries.ts";
+import { FullPageSpinner } from "@/components/full-page-spinner";
+import { useMeQuery } from "@/features/auth/queries";
 
 export function RequireAuth() {
   const { data, status } = useMeQuery();
   const loc = useLocation();
 
   if (status === "pending") return <FullPageSpinner />;
-  // no user data means => not authenticated
-  if (!data) return <Navigate to="/login" replace state={{ from: loc }} />;
+
+  if (!data) {
+    const returnTo = encodeURIComponent(loc.pathname + loc.search);
+    return <Navigate to={`/login?returnTo=${returnTo}`} replace />;
+  }
   return <Outlet />;
 }
 
-export function RedirectIfAuthed({ children }: PropsWithChildren) {
+export function RedirectIfAuthed() {
   const { data: user, status } = useMeQuery();
   const location = useLocation();
 
@@ -24,6 +26,5 @@ export function RedirectIfAuthed({ children }: PropsWithChildren) {
     const returnTo = params.get("returnTo") || "/";
     return <Navigate to={returnTo} replace />;
   }
-
-  return children ? <>{children}</> : <Outlet />;
+  return <Outlet />;
 }

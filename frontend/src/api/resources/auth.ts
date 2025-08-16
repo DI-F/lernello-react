@@ -18,7 +18,7 @@ export function verifyCode(input: VerifyCodeInput) {
 }
 
 // This endpoint is used to get the current user information
-export function me(): Promise<User> {
+export function me(): Promise<User | null> {
   return client.call(AuthMe, undefined).exec();
 }
 
