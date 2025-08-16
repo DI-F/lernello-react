@@ -2,10 +2,10 @@ import * as React from "react";
 import { GalleryVerticalEnd } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils.ts";
+import { Button } from "@/components/ui/button.tsx";
+import { Input } from "@/components/ui/input.tsx";
+import { Checkbox } from "@/components/ui/checkbox.tsx";
 import {
   Form,
   FormControl,
@@ -13,7 +13,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form.tsx";
 
 type Values = { email: string; remember: boolean };
 
