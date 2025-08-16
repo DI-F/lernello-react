@@ -19,9 +19,17 @@ type Values = { email: string; remember: boolean };
 
 type Props = React.ComponentProps<"div"> & {
   onSubmit?: (values: Values) => void;
+  loading?: boolean;
+  errorMessage?: string | null;
 };
 
-export function LoginForm({ className, onSubmit, ...props }: Props) {
+export function LoginForm({
+  className,
+  onSubmit,
+  loading = false,
+  errorMessage = null,
+  ...props
+}: Props) {
   const form = useForm<Values>({
     defaultValues: { email: "", remember: true },
     mode: "onSubmit",
@@ -37,6 +45,7 @@ export function LoginForm({ className, onSubmit, ...props }: Props) {
           })}
           className="flex flex-col gap-6"
         >
+          {/* Branding/Header */}
           <div className="flex flex-col items-center gap-2">
             <div className="flex size-10 items-center justify-center rounded-lg">
               <GalleryVerticalEnd className="size-7" />
@@ -47,6 +56,7 @@ export function LoginForm({ className, onSubmit, ...props }: Props) {
             </p>
           </div>
 
+          {/* Email */}
           <FormField
             control={form.control}
             name="email"
@@ -68,6 +78,7 @@ export function LoginForm({ className, onSubmit, ...props }: Props) {
             )}
           />
 
+          {/* Remember device */}
           <FormField
             control={form.control}
             name="remember"
@@ -93,12 +104,14 @@ export function LoginForm({ className, onSubmit, ...props }: Props) {
             )}
           />
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? "Sending…" : "Continue"}
+          {/* Error Message */}
+          {errorMessage ? (
+            <p className="text-sm text-destructive">{errorMessage}</p>
+          ) : null}
+
+          {/* Submit */}
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Sending..." : "Continue"}
           </Button>
         </form>
       </Form>
