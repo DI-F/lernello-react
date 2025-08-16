@@ -1,9 +1,9 @@
 import { AppLayout } from "@/layout/AppLayout.tsx";
 import { DashboardPage } from "@/pages/DashboardPage.tsx";
 import { LearningUnitPage } from "@/pages/learning-unit/LearningUnitPage.tsx";
-import { LoginPage } from "../pages/login/LoginPage.tsx";
+import { LoginPage } from "@/pages/auth/LoginPage.tsx";
 import { Route, Routes } from "react-router";
-import { LoginVerifyPage } from "../pages/login/LoginVerifyPage.tsx";
+import { LoginVerifyPage } from "@/pages/auth/LoginVerifyPage.tsx";
 import { RedirectIfAuthed, RequireAuth } from "./auth-guards.tsx";
 
 export function AppRouter() {
