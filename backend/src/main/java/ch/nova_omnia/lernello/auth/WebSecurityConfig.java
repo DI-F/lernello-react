@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,9 +27,10 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
-    public static final String[] WHITELIST_URLS = {"/api/auth/**", "/error", "/v3/api-docs/**", "/swagger-ui/**", "/webjars/**", "/h2-console/**", "/files/**"
+    public static final String[] WHITELIST_URLS = {
+        "/api/auth/**", "/error", "/v3/api-docs/**", "/swagger-ui/**", "/webjars/**", "/h2-console/**", "/files/**"
     };
-    @Value("${cors.allowed-origins}")
+    @Value("${cors.allowed-origins:http://localhost:5173}")
     private String corsAllowedOrigins;
 
     @Bean
@@ -37,10 +39,8 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    AuthenticationManager authenticationManager(
-        AuthenticationConfiguration authenticationConfiguration
-    ) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
+        return cfg.getAuthenticationManager();
     }
 
     @Bean
@@ -51,8 +51,8 @@ public class WebSecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        List<String> allowedOrigins = Arrays.asList(corsAllowedOrigins.split(","));
-        configuration.setAllowedOrigins(allowedOrigins);
+        List<String> allowed = Arrays.asList(corsAllowedOrigins.split(","));
+        configuration.setAllowedOrigins(allowed);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -61,39 +61,18 @@ public class WebSecurityConfig {
         return source;
     }
 
-    /**
-     * Initializes and configures the application's security filter chain.
-     * <p>
-     * This method is invoked once during application startup to set up the HTTP
-     * security configuration. This allows for configuring the security filter chain
-     * that will be applied to all HTTP requests.
-     * There is no need to check each request individually, as the filter chain
-     * will be applied to all requests.
-     * </p>
-     *
-     * @param http the {@link HttpSecurity} instance used to configure web security
-     * @return the fully configured {@link SecurityFilterChain} applied to all HTTP requests
-     * @throws Exception if an error occurs during the configuration process
-     */
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Disable CSRF
             .csrf(AbstractHttpConfigurer::disable)
-            // Enable CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            // Allow H2 console from the same origin
-            .headers((headers) -> headers.frameOptions(
-                frameOptionsConfig -> frameOptionsConfig.sameOrigin()
-            ))
-            // Disable session management
-            .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // Configure the authorization of requests
-            .authorizeHttpRequests(
-                auth -> auth.requestMatchers(WHITELIST_URLS).permitAll() // Allow all requests to /api/auth/**
-                    .anyRequest().authenticated() // All other requests require authentication
+            .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(WHITELIST_URLS).permitAll()
+                .anyRequest().authenticated()
             );
-        // Add the JWT Token filter before the UsernamePasswordAuthenticationFilter
+
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

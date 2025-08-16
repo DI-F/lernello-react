@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -35,24 +34,16 @@ public class UserService {
     }
 
     @Transactional
-    public User findOrCreateByUsername(String email) {
-        final String normalized = (email == null) ? null : email.trim().toLowerCase(Locale.ROOT);
-        if (normalized == null || normalized.isEmpty()) {
-            throw new IllegalArgumentException("email required");
-        }
-
-        User existing = userRepository.findByUsername(normalized);
-        if (existing != null) return existing;
-
-        User u = new User();
-        u.setUsername(normalized);
-        try {
-            u.setUsername(normalized);
-        } catch (Exception ignored) {
-            throw new IllegalArgumentException("Existing user with username " + normalized + " already exists.");
-        }
-        u.setRole(Role.TRAINEE);
-        return userRepository.save(u);
+    public User findOrCreateByEmail(String email) {
+        return userRepository.findByUsernameIgnoreCase(email)
+            .orElseGet(() -> {
+                User u = new User();
+                u.setUsername(email);
+                u.setUsername(email); // falls getrennte Felder vorhanden
+                // setze Standardrolle, z. B. TRAINEE
+                u.setRole(ch.nova_omnia.lernello.user.model.Role.TRAINEE);
+                return userRepository.save(u);
+            });
     }
 
     public User findByUuid(UUID uuid) {
