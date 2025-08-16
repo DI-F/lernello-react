@@ -1,12 +1,14 @@
 package ch.nova_omnia.lernello.auth.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(
     name = "auth_otp_codes",

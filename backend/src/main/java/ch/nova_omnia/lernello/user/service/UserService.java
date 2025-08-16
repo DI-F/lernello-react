@@ -13,10 +13,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -30,6 +32,27 @@ public class UserService {
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    @Transactional
+    public User findOrCreateByUsername(String email) {
+        final String normalized = (email == null) ? null : email.trim().toLowerCase(Locale.ROOT);
+        if (normalized == null || normalized.isEmpty()) {
+            throw new IllegalArgumentException("email required");
+        }
+
+        User existing = userRepository.findByUsername(normalized);
+        if (existing != null) return existing;
+
+        User u = new User();
+        u.setUsername(normalized);
+        try {
+            u.setUsername(normalized);
+        } catch (Exception ignored) {
+            throw new IllegalArgumentException("Existing user with username " + normalized + " already exists.");
+        }
+        u.setRole(Role.TRAINEE);
+        return userRepository.save(u);
     }
 
     public User findByUuid(UUID uuid) {
@@ -66,25 +89,12 @@ public class UserService {
         return userRepository.findByUsername(userDetails.getUsername());
     }
 
-    public boolean changePassword(String username, String newPassword) {
-        User user = userRepository.findByUsername(username);
-        if (user.isChangedPassword()) {
-            return false;
-        }
-        user.setPassword(passwordEncoder.encode(newPassword));
-        user.setChangedPassword(true);
-        userRepository.save(user);
-        return true;
-    }
-
     public User createUser(String username, String name, String surname, Role role) {
         User user = new User();
         user.setUsername(username);
         user.setSurname(surname);
         user.setName(name);
         user.setRole(role);
-        user.setPassword(passwordEncoder.encode(generateRandomPassword()));
-        user.setChangedPassword(false);
         userRepository.save(user);
         return user;
     }
