@@ -62,12 +62,18 @@ public class OtpCodeService {
         final Instant now = Instant.now();
         final String email = req.email().trim().toLowerCase();
 
+        // only allow requests for existing users
+        if (userService.findByUsername(email) == null) {
+            // don't leak existence of user -> prevents enumeration attacks
+            return;
+        }
+
         otpCodeRepository.findActiveByEmail(email, now).ifPresent(active -> {
             if (active.getResendAvailableAt() != null && active.getResendAvailableAt().isAfter(now)) {
                 long wait = active.getResendAvailableAt().getEpochSecond() - now.getEpochSecond();
                 throw new IllegalArgumentException("Please wait " + wait + "s before requesting a new code.");
             }
-            otpCodeRepository.deleteAllActiveForEmail(email); // delete old active codes
+            otpCodeRepository.deleteAllActiveForEmail(email);
         });
 
         String code = genCode();
@@ -115,6 +121,7 @@ public class OtpCodeService {
             .path("/").maxAge(maxAge).build();
     }
 
+    //TODO: Cleanup old and expired OTP codes needs to be called periodically
     @Transactional
     public int cleanup() {
         Instant now = Instant.now();

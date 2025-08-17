@@ -19,7 +19,7 @@ export function AppRouter() {
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
-          <Route path="learning-unit" element={<LearningUnitPage />} />
+          <Route path="learning-kits" element={<LearningUnitPage />} />
         </Route>
       </Route>
 

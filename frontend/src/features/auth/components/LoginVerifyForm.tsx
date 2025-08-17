@@ -126,6 +126,7 @@ export function VerifyForm({
             <Separator />
             <div className="flex items-center justify-between">
               <Button
+                variant="ghost"
                 type="button"
                 className="text-muted-foreground underline underline-offset-4"
                 onClick={onChangeEmail}
@@ -133,6 +134,7 @@ export function VerifyForm({
                 Change email
               </Button>
               <Button
+                variant="ghost"
                 type="button"
                 className="text-muted-foreground underline underline-offset-4 disabled:opacity-50"
                 onClick={onResend}
