@@ -2,7 +2,6 @@ package ch.nova_omnia.lernello.user.service;
 
 import ch.nova_omnia.lernello.learningKit.model.LearningKit;
 import ch.nova_omnia.lernello.user.model.User;
-import ch.nova_omnia.lernello.user.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -23,9 +21,6 @@ public class EmailService {
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
     private static final String CHARSET = StandardCharsets.UTF_8.name();
     private final JavaMailSender javaMailSender;
-    private final PasswordEncoder passwordEncoder;
-    private final UserRepository userRepository;
-    private final UserService userService;
     @Value("${spring.mail.username}")
     private String sender;
 

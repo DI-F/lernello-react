@@ -1,19 +1,12 @@
 package ch.nova_omnia.lernello.service;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
+import ch.nova_omnia.lernello.learningKit.model.LearningKit;
+import ch.nova_omnia.lernello.learningKit.repository.LearningKitRepository;
+import ch.nova_omnia.lernello.learningKit.service.LearningKitService;
+import ch.nova_omnia.lernello.user.model.Role;
+import ch.nova_omnia.lernello.user.model.User;
+import ch.nova_omnia.lernello.user.repository.UserRepository;
+import ch.nova_omnia.lernello.user.service.EmailService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,14 +16,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import ch.nova_omnia.lernello.learningKit.model.LearningKit;
-import ch.nova_omnia.lernello.learningKit.repository.LearningKitRepository;
-import ch.nova_omnia.lernello.learningKit.service.LearningKitService;
-import ch.nova_omnia.lernello.statistic.service.StatisticService;
-import ch.nova_omnia.lernello.user.model.Role;
-import ch.nova_omnia.lernello.user.model.User;
-import ch.nova_omnia.lernello.user.repository.UserRepository;
-import ch.nova_omnia.lernello.user.service.EmailService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class LearningKitServiceTest {
@@ -44,9 +36,6 @@ class LearningKitServiceTest {
     @Mock
     private EmailService emailService;
 
-    @Mock
-    private StatisticService progressService;
-
     @InjectMocks
     private LearningKitService service;
 
@@ -56,7 +45,7 @@ class LearningKitServiceTest {
     @Test
     void shouldReturnPublishedKitsForTrainee() {
         UUID traineeId = UUID.randomUUID();
-        when(userRepository.findByUuid(traineeId)).thenReturn(new User("username", "surname", "name", "password", "en", Role.TRAINEE));
+        when(userRepository.findByUuid(traineeId)).thenReturn(new User("username", "surname", "name", "en", Role.TRAINEE));
         List<LearningKit> kits = List.of(new LearningKit(), new LearningKit());
         Page<LearningKit> page = new PageImpl<>(kits);
         when(learningKitRepository.findAllByTrainees_UuidAndPublishedTrue(traineeId, Pageable.unpaged())).thenReturn(page);
@@ -72,7 +61,7 @@ class LearningKitServiceTest {
     @Test
     void shouldReturnAllKitsForNonTrainee() {
         UUID adminId = UUID.randomUUID();
-        when(userRepository.findByUuid(adminId)).thenReturn(new User("username", "surname", "name", "password", "en", Role.INSTRUCTOR));
+        when(userRepository.findByUuid(adminId)).thenReturn(new User("username", "surname", "name", "en", Role.INSTRUCTOR));
         when(learningKitRepository.findAllByOrderByCreatedAtDesc(Pageable.unpaged())).thenReturn(Page.empty());
         List<LearningKit> kits = List.of(new LearningKit());
         Page<LearningKit> page = new PageImpl<>(kits);
@@ -115,7 +104,7 @@ class LearningKitServiceTest {
     void shouldRemoveExistingTrainee() {
         UUID kitId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        User trainee = new User("trainee", "surname", "name", "password", "en", Role.TRAINEE);
+        User trainee = new User("trainee", "surname", "name", "en", Role.TRAINEE);
         trainee.setUuid(userId);
         LearningKit kit = new LearningKit();
         kit.setUuid(kitId);
@@ -148,8 +137,8 @@ class LearningKitServiceTest {
     @Test
     void shouldPublishAndInviteOnlyTrainees() {
         UUID kitId = UUID.randomUUID();
-        User t1 = new User("trainee", "surname", "name", "password", "en", Role.TRAINEE);
-        User t2 = new User("other", "surname", "name", "password", "en", Role.INSTRUCTOR);
+        User t1 = new User("trainee", "surname", "name", "en", Role.TRAINEE);
+        User t2 = new User("other", "surname", "name", "en", Role.INSTRUCTOR);
         LearningKit kit = new LearningKit();
         kit.setTrainees(new ArrayList<>(List.of(t1, t2)));
         when(learningKitRepository.findById(kitId)).thenReturn(Optional.of(kit));
@@ -167,7 +156,7 @@ class LearningKitServiceTest {
     @Test
     void shouldSaveTraineeInKit() {
         UUID kitId = UUID.randomUUID();
-        User newTrainee = new User("newTrainee", "surname", "name", "password", "en", Role.TRAINEE);
+        User newTrainee = new User("newTrainee", "surname", "name", "en", Role.TRAINEE);
         LearningKit kit = new LearningKit();
         kit.setTrainees(new ArrayList<>());
         when(learningKitRepository.findById(kitId)).thenReturn(Optional.of(kit));

@@ -1,12 +1,9 @@
 package ch.nova_omnia.lernello.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-import java.util.UUID;
-
+import ch.nova_omnia.lernello.user.model.Role;
+import ch.nova_omnia.lernello.user.model.User;
+import ch.nova_omnia.lernello.user.repository.UserRepository;
+import ch.nova_omnia.lernello.user.service.CustomUserDetailsService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,10 +13,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import ch.nova_omnia.lernello.user.model.Role;
-import ch.nova_omnia.lernello.user.model.User;
-import ch.nova_omnia.lernello.user.repository.UserRepository;
-import ch.nova_omnia.lernello.user.service.CustomUserDetailsService;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CustomUserDetailsServiceTest {
@@ -31,28 +30,9 @@ class CustomUserDetailsServiceTest {
     CustomUserDetailsService service;
 
     @Test
-    void loadUserByUsernameShouldReturnScopesWhenPasswordNotChanged() {
-        User user = new User();
-        user.setUsername("user1");
-        user.setPassword("pwd");
-        user.setChangedPassword(false);
-
-        when(userRepository.findByUsername("user1")).thenReturn(user);
-
-        UserDetails details = service.loadUserByUsername("user1");
-
-        assertThat(details.getUsername()).isEqualTo("user1");
-        assertThat(details.getPassword()).isEqualTo("pwd");
-        List<String> auths = details.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-        assertThat(auths).containsExactlyInAnyOrder("SCOPE_self:read", "SCOPE_password:write");
-    }
-
-    @Test
     void loadUserByUsernameShouldReturnTraineeScopesWhenPasswordChanged() {
         User user = new User();
         user.setUsername("trainee");
-        user.setPassword("pwd2");
-        user.setChangedPassword(true);
         user.setRole(Role.TRAINEE);
 
         when(userRepository.findByUsername("trainee")).thenReturn(user);
@@ -67,8 +47,6 @@ class CustomUserDetailsServiceTest {
     void loadUserByUsernameShouldReturnInstructorScopesWhenPasswordChanged() {
         User user = new User();
         user.setUsername("instr");
-        user.setPassword("pwd3");
-        user.setChangedPassword(true);
         user.setRole(Role.INSTRUCTOR);
 
         when(userRepository.findByUsername("instr")).thenReturn(user);
