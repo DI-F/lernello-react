@@ -1,6 +1,16 @@
 import { Navigate, Outlet, useLocation } from "react-router";
 import { FullPageSpinner } from "@/components/full-page-spinner";
-import { useMeQuery } from "@/features/auth/queries";
+import { useQuery } from "@tanstack/react-query";
+import type { User } from "@/schemas/user/user.ts";
+import { me } from "@/api/resources/auth.ts";
+
+function useMeQuery() {
+  return useQuery<User | null>({
+    queryKey: ["me"],
+    queryFn: me,
+    retry: false, // Do not retry on failure, as this is a user-specific query
+  });
+}
 
 export function RequireAuth() {
   const { data, status } = useMeQuery();
