@@ -3,6 +3,7 @@ import { DashboardPage } from "@/pages/DashboardPage.tsx";
 import { LearningUnitPage } from "@/pages/learning-unit/LearningUnitPage.tsx";
 import { AppLayout } from "@/layout/AppLayout.tsx";
 import { LearningKitsPage } from "@/pages/LearningKitsPage.tsx";
+import { LearningUnitTrainingPage } from "@/pages/learning-unit/training/LearningUnitTrainingPage.tsx";
 
 export function AppRouter() {
   return (
@@ -11,6 +12,7 @@ export function AppRouter() {
         <Route index element={<DashboardPage />} />
         <Route path="learning-kits" element={<LearningKitsPage />} />
         <Route path="learning-unit" element={<LearningUnitPage />} />
+	  	<Route path="learning-unit/training" element={<LearningUnitTrainingPage />} />
       </Route>
     </Routes>
   );
