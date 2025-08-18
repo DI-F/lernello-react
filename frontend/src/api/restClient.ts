@@ -1,12 +1,3 @@
-// The "engine" that executes endpoint descriptors with:
-// - Zod validation (request + response)
-// - Cookies via credentials: "include"
-// - Optional timeout/abort via AbortController
-// - Optional simple retries (for transient failures)
-// - FormData support (no Content-Type header set)
-// - Query param building (incl. arrays)
-// - Spring Boot error mapping into ApiError
-
 import { API_URL, ApiError } from "./client";
 import type { Endpoint } from "./createEndpoint";
 import { SpringErrorSchema } from "@/schemas/common/spring-error";
@@ -24,19 +15,21 @@ function toQueryString(obj: Record<string, unknown>) {
   const p = new URLSearchParams();
   for (const [k, v] of Object.entries(obj)) {
     if (v === undefined || v === null) continue;
-    p.append(k, String(v));
+    if (Array.isArray(v)) {
+      for (const item of v) p.append(k, String(item));
+    } else {
+      p.append(k, String(v));
+    }
   }
   const s = p.toString();
   return s ? `?${s}` : "";
 }
 
-// Build a full URL from a path and optional query parameters
 function buildUrl(path: string, query?: Record<string, unknown>) {
   const base = new URL(path, API_URL).toString();
   return query ? base + toQueryString(query) : base;
 }
 
-// Options to configure a client instance once (Factory pattern)
 export type ClientOptions = {
   fetchFn?: typeof fetch;
   withCredentials?: boolean; // default: true
@@ -45,23 +38,17 @@ export type ClientOptions = {
   retries?: number; // default: 0
 };
 
-/**
- * Factory: create a configured client with closure over options.
- * You call `createClient(...)` once and get a reusable `{ call }`.
- */
 export function createClient(opts: ClientOptions = {}) {
   const fetchFn = opts.fetchFn ?? fetch;
   const withCreds = opts.withCredentials ?? true;
   const timeoutMs = opts.timeoutMs ?? 0;
   const retries = Math.max(0, opts.retries ?? 0);
 
-  // Perform fetch with optional AbortController-based timeout
   async function doFetch(input: RequestInfo | URL, init: RequestInit) {
     const controller = timeoutMs ? new AbortController() : undefined;
     const timer = timeoutMs
       ? setTimeout(() => controller!.abort(), timeoutMs)
       : undefined;
-
     try {
       return await fetchFn(input, { ...init, signal: controller?.signal });
     } finally {
@@ -69,15 +56,6 @@ export function createClient(opts: ClientOptions = {}) {
     }
   }
 
-  /**
-   * The single internal "call" that does the actual work.
-   *
-   * Generics mirror `Endpoint`:
-   * - TResSchema: response Zod schema → return type is z.infer<TResSchema>
-   * - TPathArgs:  tuple for building the path (...args)
-   * - TPayloadSchema: request body schema (or null)
-   * - TQuerySchema:   query schema (or null)
-   */
   async function call<
     TResSchema extends z.ZodTypeAny,
     TPathArgs extends unknown[],
@@ -93,7 +71,7 @@ export function createClient(opts: ClientOptions = {}) {
       ? z.infer<TQuerySchema>
       : undefined,
   ): Promise<z.infer<TResSchema>> {
-    // 1) Validate payload & query with Zod (runtime safety)
+    // 1) Zod-Validation
     const parsedBody = ep.payloadSchema
       ? ep.payloadSchema.parse(payload)
       : undefined;
@@ -101,18 +79,18 @@ export function createClient(opts: ClientOptions = {}) {
       ? ep.querySchema.parse(query)
       : undefined;
 
-    // 2) Build URL & headers. FormData → let browser set Content-Type.
+    // 2) URL/Headers
     const url = buildUrl(
       ep.getPath(...pathArgs),
       parsedQuery as Record<string, unknown>,
     );
     const headers: Record<string, string> = isFormData(parsedBody)
-      ? { ...(opts.extraHeaders ?? {}) } // leave Content-Type unset for multipart
+      ? { ...(opts.extraHeaders ?? {}) }
       : { "Content-Type": "application/json", ...(opts.extraHeaders ?? {}) };
 
     const init: RequestInit = {
       method: ep.method,
-      credentials: withCreds ? "include" : "same-origin", // include cookies when talking to your API
+      credentials: withCreds ? "include" : "same-origin",
       headers,
       body: parsedBody
         ? isFormData(parsedBody)
@@ -121,21 +99,48 @@ export function createClient(opts: ClientOptions = {}) {
         : undefined,
     };
 
-    // 3) Fetch with simple retry/backoff on transient failures.
-    //    - AbortError (timeout) or 5xx → retry (if retries > 0)
     let lastErr: unknown;
+
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         const res = await doFetch(url, init);
         const text = await res.text().catch(() => "");
-
         if (!res.ok) {
-          // Try to parse JSON error (e.g., Spring Boot format)
+          // Auto-Refresh on 401 (once), except if we are already calling /auth/refresh
+          const isRefreshCall = url.includes("/api/auth/refresh");
+          if (res.status === 401 && withCreds && !isRefreshCall) {
+            try {
+              const rf = await doFetch(
+                new URL("/api/auth/refresh", API_URL).toString(),
+                {
+                  method: "POST",
+                  credentials: "include",
+                },
+              );
+              if (rf.ok) {
+                const res2 = await doFetch(url, init);
+                const text2 = await res2.text().catch(() => "");
+                if (!res2.ok) {
+                  throw new ApiError(
+                    text2 || `HTTP ${res2.status}`,
+                    res2.status,
+                    text2 ? JSON.parse(text2) : undefined,
+                  );
+                }
+                const json2 = text2 ? JSON.parse(text2) : {};
+                return ep.responseSchema.parse(json2);
+              }
+            } catch {
+              // Ignore errors during refresh attempt
+              /* noop */
+            }
+          }
+
           let parsed: unknown;
           try {
             parsed = text ? JSON.parse(text) : undefined;
           } catch {
-            /* empty */
+            /* noop */
           }
           const spring = SpringErrorSchema.safeParse(parsed);
           const msg = spring.success
@@ -145,35 +150,24 @@ export function createClient(opts: ClientOptions = {}) {
           throw new ApiError(msg, res.status, parsed);
         }
 
-        // 4) Parse JSON and validate the response with Zod
         const json = text ? JSON.parse(text) : {};
         return ep.responseSchema.parse(json);
       } catch (e: any) {
-        lastErr = e;
         lastErr = e;
         const transient =
           e?.name === "AbortError" ||
           (e instanceof ApiError && e.status >= 500);
         if (attempt < retries && transient) {
-          await new Promise((r) => setTimeout(r, 300 * (attempt + 1))); // simple backoff
+          await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
           continue;
         }
         throw e;
       }
     }
+
     throw lastErr;
   }
 
-  /**
-   * Public API:
-   *   client.call(endpoint, payload, ...pathArgs)
-   *     .exec()               // without query params
-   *     .withQuery(queryObj)  // with validated & serialized query params
-   *
-   * Why return an object with `.exec()` and `.withQuery()`?
-   * - Convenience: same entry-point for endpoints with/without query.
-   * - You pass endpoint + payload + path args once, then choose to add query or not.
-   */
   return {
     call: <
       TResSchema extends z.ZodTypeAny,
@@ -197,5 +191,5 @@ export function createClient(opts: ClientOptions = {}) {
   };
 }
 
-// Standard-Client: 15s Timeout, no Retries
+// Standard-Client: 15s Timeout, no retries
 export const client = createClient({ timeoutMs: 15000, retries: 0 });

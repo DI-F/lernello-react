@@ -9,11 +9,12 @@ export function LoginPage() {
 
   const requestCodeMutation = useMutation({
     mutationFn: (input: RequestCodeInput) => requestCode(input),
-    onSuccess: (_data, variables) => {
-      navigate(`/verify?email=${encodeURIComponent(variables.email)}`);
+    onSuccess: (_data, vars) => {
+      const r = vars.remember ?? true;
+      navigate(`/verify?email=${encodeURIComponent(vars.email)}&remember=${r}`);
     },
   });
-  
+
   return (
     <div className="bg-background flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
