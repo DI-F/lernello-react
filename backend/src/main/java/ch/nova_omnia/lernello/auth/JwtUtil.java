@@ -1,6 +1,9 @@
 package ch.nova_omnia.lernello.auth;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,67 +22,47 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String jwtSecret;
     private SecretKey key;
-    @Value("${jwt.expiration}")
-    private int jwtExpirationMs;
 
-    /**
-     * Initializes the key for the JWT operations.
-     */
     @PostConstruct
     public void init() {
-        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        byte[] keyBytes;
+        String s = jwtSecret.trim();
+        try {
+            keyBytes = Decoders.BASE64.decode(s);
+        } catch (IllegalArgumentException ignore) {
+            keyBytes = s.getBytes(StandardCharsets.UTF_8);
+        }
+        if (keyBytes.length < 32) {
+            throw new IllegalStateException("jwt.secret must be >= 32 bytes (256-bit). Provide a long random string or Base64-encode it.");
+        }
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     /**
-     * Returns the expiration time of the JWT token.
-     *
-     * @return The expiration time.
+     * Creates a JWT with the exact desired lifetime.
      */
-    public Duration getExpirationTime() {
-        return Duration.ofMillis(jwtExpirationMs);
+    public String generateToken(String subject, Duration ttl) {
+        Date now = new Date();
+        Date exp = new Date(now.getTime() + ttl.toMillis());
+        return Jwts.builder()
+            .setSubject(subject)
+            .setIssuedAt(now)
+            .setExpiration(exp)
+            .signWith(key, SignatureAlgorithm.HS256)
+            .compact();
     }
-
-    /**
-     * Generates a JWT token for a user.
-     *
-     * @param username The username of the user.
-     * @return The generated token.
-     */
-    public String generateToken(String username) {
-        return Jwts.builder().setSubject(username).setIssuedAt(new Date()).setExpiration(new Date((new Date()).getTime() + jwtExpirationMs)).signWith(key, SignatureAlgorithm.HS256).compact();
-    }
-
-    /**
-     * Extracts the username from a JWT token.
-     *
-     * @param token The token to extract the username from.
-     * @return The username.
-     */
+    
     public String getUsernameFromToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parserBuilder().setSigningKey(key).build()
+            .parseClaimsJws(token).getBody().getSubject();
     }
 
-    /**
-     * Validates a JWT token.
-     *
-     * @param token The token to validate.
-     * @return Whether the token is valid.
-     */
     public boolean validateJwtToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        } catch (SecurityException e) {
-            //TODO add logging here
-        } catch (MalformedJwtException e) {
-            //TODO add logging here
-        } catch (ExpiredJwtException e) {
-            //TODO add logging here
-        } catch (UnsupportedJwtException e) {
-            //TODO add logging here
-        } catch (IllegalArgumentException e) {
-            //TODO add logging here
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
         }
-        return false;
     }
 }

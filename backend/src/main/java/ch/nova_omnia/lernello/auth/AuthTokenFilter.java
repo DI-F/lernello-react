@@ -7,6 +7,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,23 +27,14 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtils;
     @Autowired
     private CustomUserDetailsService userDetailsService;
+    @Value("${app.auth.access-cookie-name}")
+    private String accessCookieName;
 
-    /**
-     * Filters the request and authenticates the user if a JWT token is present.
-     * If the token is valid, the user is authenticated and the request is continued.
-     *
-     * @param request     The request to filter.
-     * @param response    The response to filter.
-     * @param filterChain The filter chain to continue the request.
-     * @throws ServletException If an error occurs during the filter.
-     * @throws IOException      If an error occurs during the filter.
-     */
     @Override
     protected void doFilterInternal(
         @NonNull HttpServletRequest request,
         @NonNull HttpServletResponse response,
-        @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
+        @NonNull FilterChain filterChain) throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
@@ -55,7 +47,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            // Log the exception for debugging purposes
             e.printStackTrace();
         }
         filterChain.doFilter(request, response);
@@ -66,16 +57,14 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
             return headerAuth.substring(7);
         }
-
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("lernello_auth_token".equals(cookie.getName())) {
+                if (accessCookieName.equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }
         }
-
         return null;
     }
 }

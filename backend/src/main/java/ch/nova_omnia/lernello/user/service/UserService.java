@@ -1,22 +1,15 @@
 package ch.nova_omnia.lernello.user.service;
 
-import ch.nova_omnia.lernello.auth.JwtUtil;
 import ch.nova_omnia.lernello.learningKit.model.LearningKit;
 import ch.nova_omnia.lernello.learningKit.repository.LearningKitRepository;
 import ch.nova_omnia.lernello.user.model.Role;
 import ch.nova_omnia.lernello.user.model.User;
 import ch.nova_omnia.lernello.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,25 +18,9 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final LearningKitRepository learningKitRepository;
-    private final JwtUtil jwtUtil;
-    private final AuthenticationManager authenticationManager;
-    private final PasswordEncoder passwordEncoder;
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
-    }
-
-    @Transactional
-    public User findOrCreateByUsername(String email) {
-        return userRepository.findByUsernameIgnoreCase(email)
-            .orElseGet(() -> {
-                User u = new User();
-                u.setUsername(email);
-                u.setUsername(email); // falls getrennte Felder vorhanden
-                // setze Standardrolle, z. B. TRAINEE
-                u.setRole(ch.nova_omnia.lernello.user.model.Role.TRAINEE);
-                return userRepository.save(u);
-            });
     }
 
     public User findByUuid(UUID uuid) {
@@ -61,19 +38,6 @@ public class UserService {
         existingUser.setSurname(user.getSurname());
         existingUser.setRole(user.getRole());
         return userRepository.save(existingUser);
-    }
-
-    public User authenticate(String username, String password) {
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(username, password)
-        );
-        authentication.getPrincipal();
-
-        User user = this.findByUsername(username);
-        user.setToken(jwtUtil.generateToken(user.getUsername()));
-        ZonedDateTime expirationTime = ZonedDateTime.now().plus(jwtUtil.getExpirationTime());
-        user.setExpires(expirationTime);
-        return user;
     }
 
     public User getUserFromUserDetails(UserDetails userDetails) {

@@ -1,6 +1,5 @@
 package ch.nova_omnia.lernello.auth.service;
 
-import ch.nova_omnia.lernello.auth.JwtUtil;
 import ch.nova_omnia.lernello.auth.dto.request.RequestCodeDTO;
 import ch.nova_omnia.lernello.auth.dto.request.VerifyCodeDTO;
 import ch.nova_omnia.lernello.auth.model.OtpCode;
@@ -10,7 +9,6 @@ import ch.nova_omnia.lernello.user.model.User;
 import ch.nova_omnia.lernello.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,19 +24,8 @@ public class OtpCodeService {
     private final OtpCodeRepository otpCodeRepository;
     private final MailService mailService;
     private final UserService userService;
-    private final JwtUtil jwtUtil;
     private final Random rng = new Random();
 
-    @Value("${app.auth.cookie-name}")
-    private String cookieName;
-    @Value("${app.auth.cookie-secure:false}")
-    private boolean cookieSecure;
-    @Value("${app.auth.cookie-samesite:Lax}")
-    private String cookieSameSite;
-    @Value("${app.auth.short-ttl-minutes}")
-    private Duration shortTtlMinutes;
-    @Value("${app.auth.long-ttl-days}")
-    private Duration longTtlDays;
     @Value("${app.auth.code-ttl-minutes}")
     private Duration codeTtlMinutes;
     @Value("${app.auth.resend-cooldown-seconds:0}")
@@ -62,10 +49,9 @@ public class OtpCodeService {
         final Instant now = Instant.now();
         final String email = req.email().trim().toLowerCase();
 
-        // only allow requests for existing users
+        // No existence leak → always return 204; ignore if user does not exist
         if (userService.findByUsername(email) == null) {
-            // don't leak existence of user -> prevents enumeration attacks
-            return;
+            return; // no user found, but we don't leak existence, 204 is returned
         }
 
         otpCodeRepository.findActiveByEmail(email, now).ifPresent(active -> {
@@ -91,7 +77,7 @@ public class OtpCodeService {
     }
 
     @Transactional
-    public ResponseCookie verify(VerifyCodeDTO dto, boolean remember) {
+    public User verify(VerifyCodeDTO dto) {
         final Instant now = Instant.now();
         final String email = dto.email().trim().toLowerCase();
 
@@ -111,21 +97,13 @@ public class OtpCodeService {
         active.setConsumedAt(now);
         otpCodeRepository.save(active);
 
-        // Secure user and generate JWT token
-        User user = userService.findOrCreateByUsername(email);
-        String token = jwtUtil.generateToken(user.getUsername());
-
-        Duration maxAge = remember ? longTtlDays : shortTtlMinutes;
-        return ResponseCookie.from(cookieName, token)
-            .httpOnly(true).secure(cookieSecure).sameSite(cookieSameSite)
-            .path("/").maxAge(maxAge).build();
+        return userService.findByUsername(email);
     }
 
-    //TODO: Cleanup old and expired OTP codes needs to be called periodically
     @Transactional
-    public int cleanup() {
+    public void cleanup() {
         Instant now = Instant.now();
         Instant beforeConsumed = now.minus(Duration.ofDays(1));
-        return otpCodeRepository.deleteOldAndExpired(beforeConsumed, now);
+        otpCodeRepository.deleteOldAndExpired(beforeConsumed, now);
     }
 }
