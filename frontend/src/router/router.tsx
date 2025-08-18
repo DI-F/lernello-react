@@ -1,6 +1,6 @@
 import { AppLayout } from "@/layout/AppLayout.tsx";
 import { DashboardPage } from "@/pages/DashboardPage.tsx";
-import { LearningUnitPage } from "@/pages/learning-unit/LearningUnitPage.tsx";
+import { LearningKitsPage } from "@/pages/learning-unit/LearningKitsPage.tsx";
 import { LoginPage } from "@/pages/auth/LoginPage.tsx";
 import { Route, Routes } from "react-router";
 import { LoginVerifyPage } from "@/pages/auth/LoginVerifyPage.tsx";
@@ -19,7 +19,7 @@ export function AppRouter() {
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
-          <Route path="learning-kits" element={<LearningUnitPage />} />
+          <Route path="learning-kits" element={<LearningKitsPage />} />
         </Route>
       </Route>
 
