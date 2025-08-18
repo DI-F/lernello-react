@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { requestCode, verifyCode } from "@/api/resources/auth.ts";
+import { toApiErrorMessage } from "@/api/client.ts";
 
 export function useVerifyController(
   email: string,
@@ -30,9 +31,9 @@ export function useVerifyController(
       verifying: verifyM.isPending,
       resendDisabled: !email || resendM.isPending,
       error: verifyM.error
-        ? "Invalid or expired code."
+        ? toApiErrorMessage(verifyM.error)
         : resendM.error
-          ? "Could not resend code."
+          ? toApiErrorMessage(resendM.error)
           : null,
     },
   } as const;
