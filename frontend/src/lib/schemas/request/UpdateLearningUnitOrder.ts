@@ -1,6 +1,8 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const UpdateLearningUnitOrderSchema = z.object({
-	learningUnitUuidsInOrder: z.array(z.string().uuid())
+  learningUnitUuidsInOrder: z.array(z.string().uuid()),
 });
-export type UpdateLearningUnitOrder = z.infer<typeof UpdateLearningUnitOrderSchema>;
+export type UpdateLearningUnitOrder = z.infer<
+  typeof UpdateLearningUnitOrderSchema
+>;

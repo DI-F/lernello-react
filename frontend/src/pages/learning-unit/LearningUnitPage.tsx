@@ -10,16 +10,16 @@ import type { BlockRes } from "@/lib/schemas/response/BlockRes.ts";
 const INSTRUCTOR_ROLE = "INSTRUCTOR";
 
 export function LearningUnitPage() {
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState("en");
 
   const handleLanguageSelect = (selectedLanguage: string) => {
-    console.log('Selected language:', selectedLanguage);
+    console.log("Selected language:", selectedLanguage);
     setLanguage(selectedLanguage);
     // Add your i18n change logic here
   };
 
   const handleSave = () => {
-    console.log('Save triggered');
+    console.log("Save triggered");
     // Add save logic here
   };
 
@@ -34,7 +34,7 @@ export function LearningUnitPage() {
         type: "THEORY",
         position: 0,
         content: "This is a theory block.",
-        translatedContents: null
+        translatedContents: null,
       },
       {
         uuid: "block-2",
@@ -44,7 +44,7 @@ export function LearningUnitPage() {
         question: "What is 2 + 2?",
         possibleAnswers: ["3", "4", "5"],
         correctAnswers: ["4"],
-        translatedContents: null
+        translatedContents: null,
       },
       {
         uuid: "block-3",
@@ -52,45 +52,55 @@ export function LearningUnitPage() {
         type: "QUESTION",
         position: 2,
         question: "Explain the concept of type safety.",
-        expectedAnswer: "Type safety ensures variables are only assigned values of the correct type.",
-        translatedContents: null
-      }
-    ]
+        expectedAnswer:
+          "Type safety ensures variables are only assigned values of the correct type.",
+        translatedContents: null,
+      },
+    ],
   };
 
-  const [learningUnit, setLearningUnit] = useState<LearningUnitRes>(hardcodedLearningUnit);
+  const [learningUnit, setLearningUnit] = useState<LearningUnitRes>(
+    hardcodedLearningUnit,
+  );
 
   // Mock user role
   const userRole = INSTRUCTOR_ROLE;
 
-  const setBlocks = (newBlocks: BlockRes[] | ((prevBlocks: BlockRes[]) => BlockRes[])) => {
-    setLearningUnit(prev => ({
+  const setBlocks = (
+    newBlocks: BlockRes[] | ((prevBlocks: BlockRes[]) => BlockRes[]),
+  ) => {
+    setLearningUnit((prev) => ({
       ...prev,
-      blocks: typeof newBlocks === 'function' ? newBlocks(prev.blocks) : newBlocks,
+      blocks:
+        typeof newBlocks === "function" ? newBlocks(prev.blocks) : newBlocks,
     }));
   };
 
   return (
-      <>
-        <LearningUnitToolbar
-            onLanguageSelect={handleLanguageSelect}
-            onSave={handleSave}
-        />
-        <Card className="w-full p-2">
-          <div className="grid h-full grid-cols-[75%_25%]">
-            <BlockEditor learningUnit={learningUnit} role={userRole} language={language} />
-            {userRole === INSTRUCTOR_ROLE && (
-                <div className="sticky top-1 h-fit self-start">
-                  <BlockReorder
-                      blocks={learningUnit.blocks}
-                      setBlocks={setBlocks}
-                      language={language}
-                      role={userRole}
-                  />
-                </div>
-            )}
-          </div>
-        </Card>
-      </>
+    <>
+      <LearningUnitToolbar
+        onLanguageSelect={handleLanguageSelect}
+        onSave={handleSave}
+      />
+      <Card className="w-full p-2">
+        <div className="grid h-full grid-cols-[75%_25%]">
+          <BlockEditor
+            learningUnit={learningUnit}
+            role={userRole}
+            language={language}
+          />
+          {userRole === INSTRUCTOR_ROLE && (
+            <div className="sticky top-1 h-fit self-start">
+              <BlockReorder
+                blocks={learningUnit.blocks}
+                setBlocks={setBlocks}
+                language={language}
+                role={userRole}
+              />
+            </div>
+          )}
+        </div>
+      </Card>
+    </>
   );
 }

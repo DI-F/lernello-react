@@ -22,8 +22,11 @@ export function AppRouter() {
         <Route element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="learning-kits" element={<LearningKitsPage />} />
-			<Route path="learning-unit" element={<LearningUnitPage />} />
-			<Route path="learning-unit/training" element={<LearningUnitTrainingPage />} />
+          <Route path="learning-unit" element={<LearningUnitPage />} />
+          <Route
+            path="learning-unit/training"
+            element={<LearningUnitTrainingPage />}
+          />
         </Route>
       </Route>
 

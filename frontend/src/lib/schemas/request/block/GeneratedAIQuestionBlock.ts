@@ -1,7 +1,9 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const GeneratedAIQuestionBlockSchema = z.object({
-	theoryBlockId: z.string().nonempty(),
-	blockId: z.string().uuid()
+  theoryBlockId: z.string().nonempty(),
+  blockId: z.string().uuid(),
 });
-export type GeneratedAIQuestionBlock = z.infer<typeof GeneratedAIQuestionBlockSchema>;
+export type GeneratedAIQuestionBlock = z.infer<
+  typeof GeneratedAIQuestionBlockSchema
+>;
