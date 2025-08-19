@@ -55,6 +55,10 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+tasks.withType<org.springframework.boot.gradle.tasks.run.BootRun> {
+    args = listOf("--spring.profiles.active=local")
+}
+
 val startDocker by tasks.registering(Exec::class) {
     group = "development"
     description = "Starts PostgreSQL via Docker Compose"
