@@ -23,8 +23,8 @@ import {
   LayoutDashboard,
   Users,
 } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { logout } from "@/api/resources/auth.ts";
+import { useAuthUser } from "@/features/auth/hooks/useAuthUser.ts";
+import { toSidebarDisplay } from "@/features/auth/utils/userDisplay.ts";
 
 type Item = {
   title: string;
@@ -32,8 +32,6 @@ type Item = {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   end?: boolean;
 };
-
-type User = { name: string; email: string; avatar: string };
 
 const general: Item[] = [
   { title: "Dashboard", to: "/", icon: LayoutDashboard, end: true },
@@ -45,13 +43,6 @@ const configuration: Item[] = [
   { title: "Users", to: "/users", icon: Users },
   { title: "Files", to: "/files", icon: FileText },
 ];
-
-// TODO //: Replace with your own user data or fetch it from an API
-const defaultUser: User = {
-  name: "shadcn",
-  email: "m@example.com",
-  avatar: "/avatars/shadcn.jpg",
-};
 
 function SidebarLink({ title, to, icon: Icon, end }: Item) {
   const match = useMatch({ path: to, end: !!end });
@@ -70,15 +61,9 @@ function SidebarLink({ title, to, icon: Icon, end }: Item) {
 export function AppSidebar(
   props: React.ComponentProps<typeof Sidebar>,
 ): JSX.Element {
-  const qc = useQueryClient();
+  const { user, signOut } = useAuthUser();
+  const displayUser = toSidebarDisplay(user);
 
-  const logoutMutate = useMutation({
-    mutationFn: logout,
-    onSuccess: () => {
-      qc.setQueryData(["me"], null);
-      qc.removeQueries({ queryKey: ["me"], exact: false });
-    },
-  });
   return (
     <Sidebar collapsible="icon" className="group" {...props}>
       <SidebarHeader>
@@ -114,7 +99,7 @@ export function AppSidebar(
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser user={defaultUser} onLogout={() => logoutMutate.mutate()} />
+        <NavUser user={displayUser} onLogout={() => signOut.mutate()} />
       </SidebarFooter>
 
       <SidebarRail />
