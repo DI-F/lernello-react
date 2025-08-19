@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import type { SidebarUser } from "@/features/auth/utils/userDisplay.ts";
+import type { SidebarUser } from "@/utils/userDisplay.ts";
 
 interface Props {
   user: SidebarUser;

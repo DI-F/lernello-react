@@ -24,7 +24,7 @@ import {
   Users,
 } from "lucide-react";
 import { useAuthUser } from "@/features/auth/hooks/useAuthUser.ts";
-import { toSidebarDisplay } from "@/features/auth/utils/userDisplay.ts";
+import { toSidebarDisplay } from "@/utils/userDisplay.ts";
 
 type Item = {
   title: string;
