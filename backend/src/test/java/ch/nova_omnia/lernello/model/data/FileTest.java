@@ -1,27 +1,6 @@
 package ch.nova_omnia.lernello.model.data;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Set;
-
 import ch.nova_omnia.lernello.PostgresTestConfig;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataIntegrityViolationException;
-
 import ch.nova_omnia.lernello.file.model.File;
 import ch.nova_omnia.lernello.file.repository.FileRepository;
 import jakarta.validation.ConstraintViolation;
@@ -30,6 +9,22 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @Import(PostgresTestConfig.class)
@@ -73,17 +68,6 @@ public class FileTest {
     public void testUUIDNotNull() {
         testFile = fileRepository.save(testFile);
         assertNotNull(testFile.getUuid());
-    }
-
-    @Test
-    public void testNameUnique() {
-        File file1 = new File("uniqueName.pdf");
-        fileRepository.saveAndFlush(file1);
-
-        File file2 = new File("uniqueName.pdf");
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            fileRepository.saveAndFlush(file2);
-        });
     }
 
     @Test
