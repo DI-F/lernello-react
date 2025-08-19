@@ -28,7 +28,6 @@ public class LoadDatabase {
     private User ensurePersisted(User user, UserRepository repo) {
         User existing = repo.findByUsername(user.getUsername());
         if (existing != null) return existing;
-        user.setChangedPassword(true);
         return repo.save(user);
     }
 
@@ -36,21 +35,21 @@ public class LoadDatabase {
     CommandLineRunner initDatabase(UserRepository userRepository, LearningKitRepository learningKitRepository, LearningUnitRepository learningUnitRepository) {
 
         return (_) -> {
-            User frodo = ensurePersisted(new User("frodo@gmail.com", "Frodo", "Baggins", encoder.encode("password"), null, Role.INSTRUCTOR), userRepository);
-            User johanna = ensurePersisted(new User("zubj@zhaw.ch", "Johanna", "Decurtins", encoder.encode("password"), null, Role.INSTRUCTOR), userRepository);
-            User liebhart = ensurePersisted(new User("lieh@zhaw.ch", "Liebhart", "Daniel", encoder.encode("password"), null, Role.INSTRUCTOR), userRepository);
+            User frodo = ensurePersisted(new User("frodo@gmail.com", "Frodo", "Baggins", null, Role.INSTRUCTOR), userRepository);
+            User johanna = ensurePersisted(new User("zubj@zhaw.ch", "Johanna", "Decurtins", null, Role.INSTRUCTOR), userRepository);
+            User liebhart = ensurePersisted(new User("lieh@zhaw.ch", "Liebhart", "Daniel", null, Role.INSTRUCTOR), userRepository);
 
-            User max = ensurePersisted(new User("max.sebastian@bluewin.ch", "Max", "Sebastian", encoder.encode("password"), null, Role.TRAINEE), userRepository);
-            User bruno = ensurePersisted(new User("bruno.frisch@gmail.com", "Bruno", "Frisch", encoder.encode("password"), null, Role.TRAINEE), userRepository);
-            User sara = ensurePersisted(new User("sara@gmail.com", "Sara", "Mueller", encoder.encode("password"), null, Role.TRAINEE), userRepository);
-            User thomas = ensurePersisted(new User("thomas@gmail.com", "Thomas", "Weber", encoder.encode("password"), null, Role.TRAINEE), userRepository);
-            User lisa = ensurePersisted(new User("lisa@gmail.com", "Lisa", "Schmidt", encoder.encode("password"), null, Role.TRAINEE), userRepository);
-            User michael = ensurePersisted(new User("michael@gmail.com", "Michael", "Wagner", encoder.encode("password"), null, Role.TRAINEE), userRepository);
-            User anna = ensurePersisted(new User("anna@gmail.com", "Anna", "Fischer", encoder.encode("password"), null, Role.TRAINEE), userRepository);
-            User david = ensurePersisted(new User("david@gmail.com", "David", "Bauer", encoder.encode("password"), null, Role.TRAINEE), userRepository);
-            User julia = ensurePersisted(new User("julia@gmail.com", "Julia", "Hoffmann", encoder.encode("password"), null, Role.TRAINEE), userRepository);
-            User peter = ensurePersisted(new User("peter@gmail.com", "Peter", "Koch", encoder.encode("password"), null, Role.TRAINEE), userRepository);
-            User dante = ensurePersisted(new User("dante@gmail.com", "Dante", "Alighieri", encoder.encode("password"), null, Role.TRAINEE), userRepository);
+            User max = ensurePersisted(new User("max.sebastian@bluewin.ch", "Max", "Sebastian", null, Role.TRAINEE), userRepository);
+            User bruno = ensurePersisted(new User("bruno.frisch@gmail.com", "Bruno", "Frisch", null, Role.TRAINEE), userRepository);
+            User sara = ensurePersisted(new User("sara@gmail.com", "Sara", "Mueller", null, Role.TRAINEE), userRepository);
+            User thomas = ensurePersisted(new User("thomas@gmail.com", "Thomas", "Weber", null, Role.TRAINEE), userRepository);
+            User lisa = ensurePersisted(new User("lisa@gmail.com", "Lisa", "Schmidt", null, Role.TRAINEE), userRepository);
+            User michael = ensurePersisted(new User("michael@gmail.com", "Michael", "Wagner", null, Role.TRAINEE), userRepository);
+            User anna = ensurePersisted(new User("anna@gmail.com", "Anna", "Fischer", null, Role.TRAINEE), userRepository);
+            User david = ensurePersisted(new User("david@gmail.com", "David", "Bauer", null, Role.TRAINEE), userRepository);
+            User julia = ensurePersisted(new User("julia@gmail.com", "Julia", "Hoffmann", null, Role.TRAINEE), userRepository);
+            User peter = ensurePersisted(new User("peter@gmail.com", "Peter", "Koch", null, Role.TRAINEE), userRepository);
+            User dante = ensurePersisted(new User("dante@gmail.com", "Dante", "Alighieri", null, Role.TRAINEE), userRepository);
 
             List<User> trainees = List.of(dante, peter, julia, david, anna, michael, lisa, thomas, sara);
 

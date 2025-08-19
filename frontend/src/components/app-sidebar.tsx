@@ -23,6 +23,8 @@ import {
   LayoutDashboard,
   Users,
 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { logout } from "@/api/resources/auth.ts";
 
 type Item = {
   title: string;
@@ -68,6 +70,15 @@ function SidebarLink({ title, to, icon: Icon, end }: Item) {
 export function AppSidebar(
   props: React.ComponentProps<typeof Sidebar>,
 ): JSX.Element {
+  const qc = useQueryClient();
+
+  const logoutMutate = useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      qc.setQueryData(["me"], null);
+      qc.removeQueries({ queryKey: ["me"], exact: false });
+    },
+  });
   return (
     <Sidebar collapsible="icon" className="group" {...props}>
       <SidebarHeader>
@@ -103,7 +114,7 @@ export function AppSidebar(
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser user={defaultUser} onLogout={() => console.log("logout")} />
+        <NavUser user={defaultUser} onLogout={() => logoutMutate.mutate()} />
       </SidebarFooter>
 
       <SidebarRail />

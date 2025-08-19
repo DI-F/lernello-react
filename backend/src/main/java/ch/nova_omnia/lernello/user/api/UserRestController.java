@@ -1,27 +1,9 @@
 package ch.nova_omnia.lernello.user.api;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import ch.nova_omnia.lernello.user.dto.request.ChangePasswordDataDTO;
 import ch.nova_omnia.lernello.user.dto.request.CreateTraineeDTO;
 import ch.nova_omnia.lernello.user.dto.request.CreateUserDTO;
 import ch.nova_omnia.lernello.user.dto.request.UpdateUserDTO;
 import ch.nova_omnia.lernello.user.dto.request.UserLocaleDTO;
-import ch.nova_omnia.lernello.user.dto.response.GenericSuccessDTO;
 import ch.nova_omnia.lernello.user.dto.response.TraineeUserDTO;
 import ch.nova_omnia.lernello.user.dto.response.UserInfoDTO;
 import ch.nova_omnia.lernello.user.dto.response.UserResDTO;
@@ -34,6 +16,14 @@ import ch.nova_omnia.lernello.user.service.EmailService;
 import ch.nova_omnia.lernello.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -46,15 +36,6 @@ public class UserRestController {
     private final TraineeUserMapper traineeUserMapper;
     private final UserMapper userMapper;
     private final EmailService emailService;
-
-    @PostMapping("/password")
-    @PreAuthorize("hasAuthority('SCOPE_password:write')")
-    public @Valid GenericSuccessDTO changePassword(
-        @RequestBody @Valid ChangePasswordDataDTO data, @AuthenticationPrincipal UserDetails userDetails
-    ) {
-        boolean status = userService.changePassword(userDetails.getUsername(), data.newPassword());
-        return new GenericSuccessDTO(status);
-    }
 
     @GetMapping("/trainees")
     @PreAuthorize("hasAuthority('SCOPE_user:read')")
@@ -105,7 +86,6 @@ public class UserRestController {
     @PreAuthorize("hasAuthority('SCOPE_user:write')")
     public @Valid UUID resetUserPassword(@PathVariable UUID id) {
         User user = userService.findByUuid(id);
-        emailService.sendNewLoginData(user);
         return id;
     }
 
