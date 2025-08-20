@@ -7,7 +7,7 @@ export const useAuthUser = () => {
   const query = useQuery({
     queryKey: ["me"],
     queryFn: () => me(),
-    staleTime: 60_000, // 1 Min "freshness"
+    staleTime: 120_000, // 1 Min "freshness"
     refetchOnWindowFocus: false,
   });
 
