@@ -15,6 +15,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 interface VerifyFormProps {
   email: string;
@@ -71,6 +72,8 @@ export function VerifyForm({ email, controller }: VerifyFormProps) {
                   <InputOTP
                     id="otp"
                     maxLength={6}
+                    autoFocus
+                    pattern={REGEXP_ONLY_DIGITS}
                     value={field.value ?? ""}
                     onChange={field.onChange}
                     className="mx-auto"
